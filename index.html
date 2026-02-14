@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Story for My Viniii 🎀</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Fredoka:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --pink-light: #ffdeeb;
+            --pink-mid: #ffafcc;
+            --pink-dark: #ff8fab;
+            --white-soft: rgba(255, 255, 255, 0.95);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            height: 100vh; width: 100vw; overflow: hidden;
+            font-family: 'Fredoka', sans-serif;
+            background: radial-gradient(circle at 50% 50%, #fff0f3 0%, #ffc8dd 100%);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: absolute; top: 25px; width: 90%; display: flex; gap: 6px; z-index: 100;
+        }
+        .progress-bar {
+            height: 4px; flex: 1; background: rgba(255, 255, 255, 0.4); border-radius: 10px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; width: 0%; background: white; transition: width 0.4s ease;
+        }
+        .progress-fill.active { width: 100%; }
+
+        /* Floating Background */
+        .floating-bg { position: absolute; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
+        .bubble { position: absolute; bottom: -50px; animation: rise 8s infinite ease-in; opacity: 0.7; font-size: 20px; }
+        @keyframes rise {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Screens */
+        .screen {
+            position: relative; z-index: 10; width: 90%; max-width: 380px;
+            background: var(--white-soft); padding: 35px 25px; border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(255, 175, 204, 0.3); border: 4px solid white;
+            text-align: center; display: none;
+        }
+        .screen.active { display: block; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        /* Photo Styles */
+        .photo-frame {
+            width: 190px; height: 190px; margin: 0 auto 20px;
+            border-radius: 50%; border: 6px solid white;
+            box-shadow: 0 10px 25px rgba(255, 143, 171, 0.4); overflow: hidden;
+            background: #fdfdfd; display: flex; align-items: center; justify-content: center;
+        }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+        h1 { font-family: 'Cherry Bomb One', cursive; color: var(--pink-dark); margin-bottom: 12px; font-size: 1.8rem; }
+        p { color: #7a5c61; line-height: 1.5; margin-bottom: 20px; font-weight: 500; font-size: 1rem; }
+
+        /* Reason List */
+        .reasons-list { text-align: left; margin: 15px 0; }
+        .reason-item { 
+            display: flex; align-items: center; gap: 10px; margin-bottom: 12px; 
+            font-size: 0.95rem; color: #7a5c61; padding: 12px; 
+            background: rgba(255, 222, 235, 0.5); border-radius: 18px;
+            opacity: 0; animation: slideRight 0.5s forwards; 
+        }
+        @keyframes slideRight { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Buttons */
+        .btn {
+            padding: 15px 30px; border-radius: 30px; border: none;
+            font-family: 'Fredoka', sans-serif; font-size: 1.1rem; font-weight: 600;
+            cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px;
+        }
+        .btn-next { background: var(--pink-dark); color: white; box-shadow: 0 6px 0px #c9184a; }
+        .btn-next:active { transform: translateY(4px); box-shadow: 0 2px 0px #c9184a; }
+        
+        .btn-yes { background: #ff4d6d; color: white; box-shadow: 0 6px 0px #a4133c; font-size: 1.3rem; }
+        .btn-no { background: #f0f0f0; color: #999; font-size: 0.85rem; width: auto; position: relative; white-space: nowrap; }
+
+        .music-toggle {
+            position: absolute; bottom: 20px; right: 20px; z-index: 200;
+            background: white; padding: 8px; border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="progress-container">
+        <div class="progress-bar"><div class="progress-fill" id="fill-1"></div></div>
+        <div class="progress-bar"><div class="progress-fill" id="fill-2"></div></div>
+        <div class="progress-bar"><div class="progress-fill" id="fill-3"></div></div>
+        <div class="progress-bar"><div class="progress-fill" id="fill-4"></div></div>
+        <div class="progress-bar"><div class="progress-fill" id="fill-5"></div></div>
+    </div>
+
+    <div class="floating-bg" id="bg"></div>
+
+    <div class="screen active" id="screen-1">
+        <span style="font-size: 60px;">💌</span>
+        <h1>Hi Viniii...</h1>
+        <p>I built this just to tell you something special and make you smile. ✨ <br><br>Ready to see it?</p>
+        <button class="btn btn-next" onclick="startStory()">Start the Surprise 🎀</button>
+    </div>
+
+    <div class="screen" id="screen-2">
+        <div class="photo-frame">
+            <img src="us.jpg" alt="Our Picture">
+        </div>
+        <h1>My Happy Place ☁️</h1>
+        <p>Before we go any further, I just wanted to say that meeting you was a very exciting chapter of my life you are my favourite ❤️</p>
+        <button class="btn btn-next" onclick="nextPage(2)">Continue... ✨</button>
+    </div>
+
+    <div class="screen" id="screen-3">
+        <h1>Small Reasons...🍓</h1>
+        <p>Why I'm so grateful for you:</p>
+        <div class="reasons-list">
+            <div class="reason-item" style="animation-delay: 0.2s">💁❤️ Firstly, you're my golu molu</div>
+            <div class="reason-item" style="animation-delay: 0.4s">😋💗 For the time we have been together</div>
+            <div class="reason-item" style="animation-delay: 0.6s">🙂‍↕️🎀 Maarne peetne ke liye (hehe)</div>
+            <div class="reason-item" style="animation-delay: 0.8s">🧿 For those trips and long drives</div>
+        </div>
+        <button class="btn btn-next" onclick="nextPage(3)">One last thing... 🧸</button>
+    </div>
+
+    <div class="screen" id="screen-4">
+        <span style="font-size: 60px;">🍯</span>
+        <h1>The Question</h1>
+        <p style="font-size: 1.2rem; color: #ff4d6d; font-weight: 600;">
+            Viniiii, I lob uu so much…<br>Will you be my Valentine? 💖
+        </p>
+        <button class="btn btn-next btn-yes" onclick="nextPage(4)">Yes 💌</button>
+        <button class="btn btn-no" id="noBtn" onmouseover="dodge()" onclick="dodge()">No 😢</button>
+    </div>
+
+    <div class="screen" id="screen-5">
+        <div class="photo-frame" style="width: 150px; height: 150px; border-color: #ff8fab;">
+            <img src="us.jpg" alt="Us">
+        </div>
+        <h1>Forever & Always 💕</h1>
+        <p>Thank you for being my Valentine.<br><br>
+        <strong>I love you so much Bby, and I promise I will never leave you. I’ll always be right by your side through every up and down. ✨</strong></p>
+        <span style="font-size: 40px;">❤️🎀🧿</span>
+    </div>
+
+    <div class="music-toggle" onclick="toggleMusic()">🔊</div>
+
+    <script>
+        const music = document.getElementById('bgMusic');
+
+        function startStory() {
+            music.play().catch(e => console.log("Music blocked. Click the icon."));
+            nextPage(1);
+        }
+
+        function toggleMusic() {
+            if (music.paused) { music.play(); document.querySelector('.music-toggle').innerText = "🔊"; }
+            else { music.pause(); document.querySelector('.music-toggle').innerText = "🔈"; }
+        }
+
+        function nextPage(current) {
+            document.getElementById(`fill-${current}`).classList.add('active');
+            document.getElementById(`screen-${current}`).style.display = 'none';
+            const next = document.getElementById(`screen-${current + 1}`);
+            if(next) {
+                next.style.display = 'block';
+                next.classList.add('active');
+            }
+            if (current === 4) triggerCelebration();
+        }
+
+        function dodge() {
+            const btn = document.getElementById('noBtn');
+            const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+            const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+            btn.style.position = 'fixed';
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+            btn.innerText = "Think once more 🥺";
+        }
+
+        function triggerCelebration() {
+            const end = Date.now() + (10 * 1000);
+            (function frame() {
+                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ffafcc', '#ff8fab'] });
+                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ffafcc', '#ff8fab'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        const icons = ['🌸', '💖', '✨', '☁️', '🍓', '🎀', '🍭'];
+        setInterval(() => {
+            const el = document.createElement('div');
+            el.className = 'bubble';
+            el.style.left = Math.random() * 100 + 'vw';
+            el.innerText = icons[Math.floor(Math.random() * icons.length)];
+            document.getElementById('bg').appendChild(el);
+            setTimeout(() => el.remove(), 8000);
+        }, 500);
+    </script>
+</body>
+</html>
